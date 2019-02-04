@@ -12,10 +12,10 @@ export KOPS_STATE_STORE=s3://$1
 
 sudo kops create cluster --zones us-east-1a --node-count=$2 ${NAME} --state=s3://$1 
 
-sleep 2m
+sleep 120
 
 sudo kops update cluster ${NAME} --yes --state=s3://$1
 
-sleep 6m
+sleep 380
 
 sudo kops validate cluster --state=s3://$1
