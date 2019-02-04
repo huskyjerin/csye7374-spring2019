@@ -1,0 +1,6 @@
+# Teardown K8s cluster using kops
+- debug:
+     msg: "----THE VALUE OF THE VARIABLE IS "
+
+- import_tasks: teardown.yml
+

@@ -1,0 +1,8 @@
+version: 1.0
+user_name: "kop_user"
+node_count: 3
+group_name: "kop_grp"
+bucket_name: "kopsbucket1234" 
+cluster_name: "jerin"
+#cluster_name: "demo2.csye6225-fall2018-rajanjerin.me"
+

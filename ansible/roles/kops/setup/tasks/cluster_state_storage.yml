@@ -1,0 +1,27 @@
+# S3 & Kops
+#
+#
+- name: Permission is given to shell
+  shell: chmod 777 roles/kops/setup/tasks/createCluster.sh
+
+- name: Executing Shell
+  shell: sh roles/kops/setup/tasks/createCluster.sh {{bucket_name}} {{node_count}} {{cluster_name}}
+
+#- name: Create Bucket
+# shell: aws s3api create-bucket --bucket kops101 --region us-east-1
+  
+#- name: Versioning Update in S3
+#  shell: aws s3api put-bucket-versioning --bucket kops101 --versioning-configuration Status=Enabled
+
+#- name: Bucket Encryption
+#shell: aws s3api put-bucket-encryption --bucket kops101 --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+#- name: Subdomain name
+# shell: export NAME=demo2.csye6225-fall2018-rajanjerin.me;export KOPS_STATE_STORE=s3://kops101;kops create cluster --zones us-east-1 env.NAME
+
+
+#- name: Update Kops
+# shell: kops update cluster demo2.csye6225-fall2018-rajanjerin.me --yes
+
+  #- name: Validate Kops
+  # shell: kops validate cluster ###
