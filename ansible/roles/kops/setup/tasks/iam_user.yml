@@ -1,0 +1,11 @@
+# Create AWS IAM Group and User
+#
+- debug:
+    msg: "----THE VALUE OF THE VARIABLEdfI {{user_name}}"
+
+
+- name : Executing role--
+  shell: chmod 777 roles/kops/setup/tasks/iam.sh
+
+- name : Executing shell script
+  shell: sh roles/kops/setup/tasks/iam.sh {{user_name}} {{group_name}}

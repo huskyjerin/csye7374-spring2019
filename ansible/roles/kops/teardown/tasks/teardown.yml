@@ -1,0 +1,10 @@
+## Teardown k8s in kops
+#
+
+- name: Permission is given to shell
+  shell: chmod 777 roles/kops/teardown/tasks/teardown.sh
+
+- name: Executing Shell
+  shell: sh roles/kops/teardown/tasks/teardown.sh {{bucket_name}} {{cluster_name}}
+
+
