@@ -4,8 +4,7 @@
 
 - hosts: localhost
   roles:
-          #            - kops/setup
-          #  - kops/build_image
-          #  - kops/push_image
-          #
+  - kops/setup
+  - kops/build_image
+  - kops/push_image
   - kops/dashboard
