@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: csye7374
+  labels:
+    app: csye7374
+spec:
+  containers:
+  - image: 921902363142.dkr.ecr.us-east-1.amazonaws.com/csye7374
+    name: csye7374
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+
+

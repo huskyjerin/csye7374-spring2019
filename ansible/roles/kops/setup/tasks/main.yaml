@@ -3,9 +3,4 @@
      msg: "----THE VALUE OF THE VARIABLE IS {{ version }}"
 
 - import_tasks: iam_user.yml
-  #- import_tasks: dns.yml
-  #- import_tasks: subdomain.yml
-- import_tasks: cluster_state_storage.yml
-  #- import_tasks: create_cluster_config.yml
-  #- import_tasks: build_cluster.yml
-  #- import_tasks: validate_cluster.yml
+- import_tasks: cluster_state_storage.yml 

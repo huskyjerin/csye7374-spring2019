@@ -1,7 +1,11 @@
+---
 # Main yaml file for k8s-setup-kops-utility
 
 
 - hosts: localhost
   roles:
-  - kops/setup
-
+          #  - kops/setup
+          #  - kops/build_image
+          #  - kops/push_image
+          #
+  - kops/dashboard
