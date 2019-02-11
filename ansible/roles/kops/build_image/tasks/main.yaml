@@ -1,0 +1,24 @@
+---
+- debug:
+    msg: "the vasdfsd -- {{group_name}}"
+
+- name: Attach policy
+  command: aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess --group-name {{group_name}} 
+
+- name: Create ECR repository
+  command: aws ecr create-repository --repository-name csye7374
+
+- name: Working Directory
+  register: pwd
+  command: echo $PWD
+
+- debug:
+    var: pwd 
+
+- name: Build docker
+  command: docker build -t csye7374 ../webapp/.
+
+- name: Tag Docker image
+  command: docker tag csye7374:latest {{account_num}}.dkr.ecr.us-east-1.amazonaws.com/csye7374:latest
+  
+

@@ -1,0 +1,35 @@
+---
+## Push image to docker
+
+- name: Authenicating ECR with aws
+  shell: $(aws ecr get-login --no-include-email --region us-east-1) 
+
+- name: Push the image to registry
+  command: docker push {{account_num}}.dkr.ecr.us-east-1.amazonaws.com/csye7374:latest
+
+- name: Working Directory
+  register: pwd
+  command: echo $PWD
+
+- debug:
+    var: pwd
+
+
+- name: Inserting account number in pod.yaml
+  register: pwd
+  shell: sed 's/AWS_ACCOUNT_ID/{{account_num}}/g' ../k8s/csye7374-pod_temp.yaml > ../k8s/csye7374-pod.yaml 
+
+- name: Creating kubernetes deployment
+  command: kubectl apply -f ../k8s/csye7374-pod.yaml
+
+- pause:
+    minutes: 4
+
+    #- name: wait for pods to come up
+    #  shell: kubectl get pods -o json
+    #  register: kubectl_get_pods
+    #  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]  
+    #  retries: 15
+
+- name: Creating a proxy for kubernetes
+  shell: nohup kubectl port-forward csye7374 8080:8080 >/dev/null 2>&1 &
