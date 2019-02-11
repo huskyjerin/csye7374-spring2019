@@ -6,12 +6,12 @@
 - name: Creating Cluster-role-binding
   shell: kubectl apply -f roles/kops/dashboard/tasks/cluster-role-binding.yaml
 
+- name: Authenticate admin user
+  register: token
+  shell: kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
+
 - name: Deploying a dashboard.
   command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
-
-- name: Print the k8s token.
-  register: token
-  shell: kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk ‘{print $1}’)
 
 - debug:
     msg:  “{{token.stdout}}”
