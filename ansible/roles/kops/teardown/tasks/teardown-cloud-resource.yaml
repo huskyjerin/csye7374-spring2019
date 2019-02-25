@@ -1,0 +1,7 @@
+--- 
+
+- name: Deleting RDS
+  rds:
+    command: delete
+    instance_name: testing01
+    region: us-east-1

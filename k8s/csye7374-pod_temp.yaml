@@ -1,16 +1,85 @@
 ---
-apiVersion: v1
-kind: Pod
+
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: csye7374
+  name: nginx-deployment
   labels:
     app: csye7374
 spec:
-  containers:
-  - image: AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/csye7374
-    name: csye7374
-    ports:
-    - containerPort: 8080
-      protocol: TCP
-
-
+  replicas: 3
+  selector:
+    matchLabels:
+      app: csye7374
+  template:
+    metadata:
+      labels:
+        app: csye7374
+    spec:
+      containers:
+        - image: AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/csye7374:latest
+          livenessProbe:
+            httpGet:
+              host: localhost
+              scheme: HTTP
+              httpHeaders:
+                - name: X-Custom-Header
+                  value: Alive
+              path: /demo-0.0.1-SNAPSHOT/probe
+              port: live-port
+            initialDelaySeconds: 5
+            timeoutSeconds: 20
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              host: localhost
+              scheme: HTTP
+              httpHeaders:
+                - name: X-Custom-Header
+                  value: Ready
+              path: /demo-0.0.1-SNAPSHOT/probe              
+              port: live-port
+            initialDelaySeconds: 5
+            timeoutSeconds: 20
+            periodSeconds: 3
+          name: csye7374
+          ports:
+          - name: live-port
+            containerPort: 8080
+            hostPort: 8080
+          env:
+          - name: ENDPOINTURL_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: aws-config-map
+                key: amazonProperties.endpointUrl
+          - name: BUCKETNAME_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: aws-config-map
+                key: amazonProperties.bucketName
+          - name: USERNAMEKEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-db-secret
+                key: username
+          - name: PASSWORDKEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-db-secret
+                key: password
+          - name: DBURLKEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-db-secret
+                key: dburl
+          - name: ACCESSKEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-db-secret
+                key: accessKey
+          - name: SECRETKEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-db-secret
+                key: secretKey
