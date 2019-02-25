@@ -24,6 +24,20 @@ import java.util.List;
 
 @Component
 public class AttachmentService {
+
+    private AmazonClient amazonClient;
+
+    @Autowired
+    public AttachmentService(AmazonClient amazonClient) {
+        this.amazonClient = amazonClient;
+    }
+
+    @Autowired
+    private Environment environment;
+
+    public boolean isBucketExists() {
+        return amazonClient.isBucketExists();
+    }
 /*
 
     //private static final Logger LOG = Logger.getLogger(AttachmentService.class);

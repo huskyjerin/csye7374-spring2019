@@ -5,6 +5,7 @@ com/person/demo/pojo/Attachment.class
 com/person/demo/Service/AttachmentService.class
 com/person/demo/Repository/AttachmentRepository.class
 com/person/demo/Repository/PersonRepository.class
+com/person/demo/DatabaseInitializer.class
 com/person/demo/Configuration/configuration.class
 com/person/demo/Service/AmazonClient.class
 com/person/demo/DemoApplication.class

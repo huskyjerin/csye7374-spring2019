@@ -1,0 +1,98 @@
+---
+
+
+# - name: Create S3
+#   s3_bucket:
+#     name: "webbucket101"
+
+# - name: Installing boto
+#   sudo: yes
+#   pip:
+#     name: ["boto3", "botocore","boto"]
+
+
+#2 Subnet ID to create subnet group 
+
+- name: dfd
+  shell: aws configure set default.region us-east-1
+
+- name: Get VPC ID
+  shell: aws ec2 describe-vpcs --filter Name=tag:Name,Values={{cluster_name}} --query 'Vpcs[0].VpcId' | tr -d '"'
+  register: resvpc
+
+- debug:
+    msg: "{{resvpc.stdout}}"
+
+
+- name: Get new Subnet ID
+  shell: aws ec2 create-subnet --availability-zone us-east-1b --vpc-id {{resvpc.stdout}} --cidr-block 172.20.0.0/20 | jq '.Subnet.SubnetId' | tr -d '"' 
+  register: resourceid
+
+- debug:
+    msg: "{{resourceid.stdout}}"
+
+- name: Add tags
+  shell: aws ec2 create-tags --resources {{resourceid.stdout}} --tags Key=Name,Value=us-east-1b.{{cluster_name}} 
+
+- name : More tags
+  shell: aws ec2 create-tags --resources {{resourceid.stdout}} --tags Key=KubernetesCluster,Value={{cluster_name}} |  aws ec2 create-tags --resources {{resourceid.stdout}} --tags Key=SubnetType,Value=Public | aws ec2 create-tags --resources {{resourceid.stdout}} --tags Key=kubernetes.io/cluster/demo2.csye6225-fall2018-rajanjerin.me,Value=owned | aws ec2 create-tags --resources {{resourceid.stdout}} --tags Key=kubernetes.io/role/elb,Value=1
+
+- name: Getting ID of Subnet1
+  shell: aws ec2 describe-subnets --filter Name=tag:KubernetesCluster,Values={{cluster_name}} --query 'Subnets[0].SubnetId' | tr -d '"'
+  register: subnet_1
+
+- name: Getting ID of Subnet2
+  shell: aws ec2 describe-subnets --filter Name=tag:KubernetesCluster,Values={{cluster_name}} --query 'Subnets[1].SubnetId' | tr -d '"'
+  register: subnet_2
+
+- debug:
+    msg: "{{subnet_1.stdout}}"
+
+- debug:
+    msg: "{{subnet_2}}"
+
+- name: Setting up RDS Subnet GroupId
+  rds_subnet_group:
+    state: present
+    name: rds_subnet1011
+    region: us-east-1
+    description: RDS Subnet Group
+    subnets:
+      - "{{subnet_1.stdout}}"
+      - "{{subnet_2.stdout}}"
+  register: rds_subnet101
+
+
+- name: Get VPC security_groups
+  shell: aws ec2  describe-security-groups --filter Name=group-name,Values=nodes.{{cluster_name}} --query 'SecurityGroups[0].GroupId' | tr -d '"'
+  register: vp_security_groups
+
+- name: Create RDS
+  rds:
+    command: create
+    instance_name: testing01
+    wait: yes
+    wait_timeout: 3600
+    db_engine: MySQL
+    db_name: dbname101
+    size: 10
+    instance_type: db.t2.micro
+    username: username
+    password: password
+    multi_zone: no
+    port: 3306
+    publicly_accessible: yes
+    region: us-east-1
+    subnet: rds_subnet1011
+    vpc_security_groups: "{{vp_security_groups.stdout}}"
+    tags:
+      Environment: test
+  register: rds_server
+
+- name: RDS ready status
+  async_status: jid={{ item.ansible_job_id }}
+  register: job_result
+  until: job_result.finished
+  with_items: "{{ rds_server.stdout }}"
+  retries: 30
+

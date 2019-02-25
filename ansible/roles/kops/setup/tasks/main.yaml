@@ -2,5 +2,52 @@
 - debug:
      msg: "----THE VALUE OF THE VARIABLE IS {{ version }}"
 
-- import_tasks: iam_user.yml
-- import_tasks: cluster_state_storage.yml 
+- name: Create IAM group
+  command: aws iam create-group --group-name {{ group_name }}
+
+- name: Create Attach group policy {{ item }}
+  command: aws iam attach-group-policy --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess --group-name {{group_name}}
+  with_items:
+    - ["AmazonEC2FullAccess","AmazonRoute53FullAccess","AmazonS3FullAccess","IAMFullAccess","AmazonVPCFullAccess"]
+
+- name: Create User
+  command: aws iam create-user --user-name {{user_name}}
+
+- name: Add User to group
+  command: aws iam add-user-to-group --user-name {{user_name}} --group-name {{group_name}}
+
+- name: Create Access Key
+  command: aws iam create-access-key --user-name {{user_name}}
+
+- name: Crate S3 bucket
+  command: aws s3api create-bucket --bucket {{bucket_name}} --region us-east-1
+
+- name: Enable S3 bucket versioning
+  command: aws s3api put-bucket-versioning --bucket {{bucket_name}} --versioning-configuration Status=Enabled
+
+- name: Enable S3 bucket encryption
+  command: aws s3api put-bucket-encryption --bucket {{bucket_name}} --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+- name: Export Kops state store
+  shell: export KOPS_STATE_STORE=s3://{{bucket_name}}
+
+- name: Create Cluster
+  command: kops create cluster --zones us-east-1a --node-count={{node_count}} {{cluster_name}} --state=s3://{{bucket_name}}
+
+- name: Update Cluster
+  command: kops update cluster {{cluster_name}} --yes --state=s3://{{bucket_name}}
+
+- name: Validate Kops - WARNING - long run time.
+  shell: kops validate cluster --state=s3://{{bucket_name}} | grep "True" | wc -l
+  args:
+    executable: /bin/bash
+  register: kops_result
+  until: kops_result.stdout.find('4') != -1
+  retries: 35
+  delay: 60
+  changed_when: False
+
+- debug:
+     msg: kops_result
+#- import_tasks: iam_user.yml
+#- import_tasks: cluster_state_storage.yml 

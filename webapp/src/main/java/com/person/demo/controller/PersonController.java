@@ -1,14 +1,18 @@
 package com.person.demo.controller;
 
+import com.amazonaws.services.opsworks.model.App;
 import com.person.demo.Exception.AppException;
 import com.person.demo.Repository.PersonRepository;
+import com.person.demo.Service.AttachmentService;
 import com.person.demo.Service.MyUserDetailsService;
 import com.person.demo.Service.PersonService;
 import com.person.demo.pojo.Person;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 import java.sql.Timestamp;
 
 import javax.validation.Valid;
@@ -30,8 +34,27 @@ public class PersonController {
     @Autowired
     private PersonService personService;
 
+    @Autowired
+    private AttachmentService attachmentService;
+
+    @Autowired
+    private Environment env;
+
+    @GetMapping("/probe")
+    public ResponseEntity<String> getProbeResult() throws AppException {
+        List<Person> personList = personService.getAllPerson();
+        boolean isExists = attachmentService.isBucketExists();
+        if (personList.size() > 0 && isExists) {
+            ResponseEntity.status(200);
+            return ResponseEntity.ok("DB connection success !! and Access of S3 bucket success!!");
+        } else {
+            ResponseEntity.status(500);
+            return ResponseEntity.ok("Either DB connection fail or S3 bucket access failed.");
+        }
+    }
+
     @GetMapping("/")
-    public ResponseEntity<List<Person>> getAllPerson() throws AppException{
+    public ResponseEntity<List<Person>> getAllPerson() throws AppException {
         List<Person> personList = personService.getAllPerson();
         return ResponseEntity.ok(personList);
     }
@@ -39,31 +62,31 @@ public class PersonController {
     @PostMapping(value = "/register")
     public ResponseEntity<String> createPerson(@Valid @RequestBody Person person) throws AppException {
         Person person1 = personService.createPerson(person);
-        if(person1!= null)
+        if (person1 != null)
             return ResponseEntity.ok("User created");
         else
             return ResponseEntity.ok("User already exists");
     }
 
     @GetMapping("/time")
-    public String getTime(){
+    public String getTime() {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String date = timestamp.toString();
         String email = userService.userName;
-        if(personRepository.findPersonByPersonEmail(email)!=null)
+        if (personRepository.findPersonByPersonEmail(email) != null)
             return date;
         else
             return "Unauthorized";
     }
 
     @PostMapping(value = "/login")
-    public String verifyPerson(@Valid @RequestBody Person person) throws AppException{
+    public String verifyPerson(@Valid @RequestBody Person person) throws AppException {
         List<Person> personList = personService.getAllPerson();
-        for(Person p : personList){
-            if(p.getPersonEmail().equals(person.getPersonEmail())){
+        for (Person p : personList) {
+            if (p.getPersonEmail().equals(person.getPersonEmail())) {
                 CharSequence verifyPassword = person.getPersonPassword();
                 System.out.println(p.getPersonPassword());
-                if(passwordEncoder.matches(verifyPassword,p.getPersonPassword())){
+                if (passwordEncoder.matches(verifyPassword, p.getPersonPassword())) {
                     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                     String date = timestamp.toString();
                     return date;
@@ -74,9 +97,25 @@ public class PersonController {
     }
 
     @GetMapping("/ping")
-    public String getPing()
-    {
+    public String getPing() {
         return "You have hit the Ping Service.";
+    }
+
+    @GetMapping("/greet/{user}")
+    public String getTest(@PathVariable("user") String user) {
+        String prefix = System.getenv().getOrDefault("amazonProperties.endpointUrl", "--IT IS DEFAULT VALUE--");
+        if (prefix == null) {
+            prefix = "---PREFIX IS NUL----!";
+        }
+
+        String keyValue = env.getProperty("amazonProperties.bucketName");
+
+        if (keyValue != null && !keyValue.isEmpty()) {
+            return keyValue;
+        } else {
+            return String.format("%s %s! Welcome to Configuring Spring Boot on Kubernetes!", prefix, user);
+
+        }
     }
 
 }

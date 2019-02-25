@@ -3,8 +3,12 @@
 
 
 - hosts: localhost
+  connection: local
+  become: yes
+  become_user: root
   roles:
-  - kops/setup
-  - kops/build_image
-  - kops/push_image
-  - kops/dashboard
+#  - kops/setup
+   - kops/build_image
+   - kops/push_image
+#  - kops/dashboard
+#  - kops/cloud_resources
