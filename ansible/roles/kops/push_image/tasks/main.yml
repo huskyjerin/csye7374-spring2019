@@ -22,6 +22,10 @@
 - name: Creating kubernetes deployment
   command: kubectl apply -f ../k8s/csye7374-pod.yaml
 
+- name: Creating kubernetes service
+  command: kubectl apply -f ../k8s/service.yaml
+
+
 - pause:
     minutes: 4
 
@@ -31,5 +35,5 @@
     #  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]  
     #  retries: 15
 
-- name: Creating a proxy for kubernetes
-  shell: nohup kubectl port-forward csye7374 8080:8080 >/dev/null 2>&1 &
+# - name: Creating a proxy for kubernetes
+#   shell: nohup kubectl port-forward csye7374 8080:8080 >/dev/null 2>&1 &
