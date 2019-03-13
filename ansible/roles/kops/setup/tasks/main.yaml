@@ -42,7 +42,7 @@
   args:
     executable: /bin/bash
   register: kops_result
-  until: kops_result.stdout.find('4') != -1
+  until: kops_result.stdout.find('3') != -1
   retries: 35
   delay: 60
   changed_when: False

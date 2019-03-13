@@ -49,7 +49,7 @@
     msg: "{{subnet_1.stdout}}"
 
 - debug:
-    msg: "{{subnet_2}}"
+    msg: "{{subnet_2.stdout}}"
 
 - name: Setting up RDS Subnet GroupId
   rds_subnet_group:
@@ -89,10 +89,13 @@
       Environment: test
   register: rds_server
 
-- name: RDS ready status
-  async_status: jid={{ item.ansible_job_id }}
-  register: job_result
-  until: job_result.finished
-  with_items: "{{ rds_server.stdout }}"
-  retries: 30
+- name: RDS Endpoint 
+  shell:  aws rds describe-db-instances --db-instance-identifier testing01 --query 'DBInstances[0].Endpoint.Address' | tr -d '"'
+  register: endpoint
+
+- name: configmap
+  shell: kubectl create configmap aws-config-map --from-literal=amazonProperties.endpointUrl="https://s3.us-east-1.amazonaws.com" --from-literal=amazonProperties.bucketName={{bucket_name}}
+
+- name: SecretMap
+  shell: kubectl create secret generic aws-db-secret --from-literal=username=username --from-literal=password=password --from-literal=dburl=jdbc:mysql://{{endpoint.stdout}}:3306/dbname101?useSSL=false --from-literal=accessKey={{accessKey}} --from-literal=secretKey={{secretKey}}
 

@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: csye7374
   labels:
     app: csye7374
 spec:
@@ -18,30 +18,6 @@ spec:
     spec:
       containers:
         - image: AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/csye7374:latest
-          livenessProbe:
-            httpGet:
-              host: localhost
-              scheme: HTTP
-              httpHeaders:
-                - name: X-Custom-Header
-                  value: Alive
-              path: /demo-0.0.1-SNAPSHOT/probe
-              port: live-port
-            initialDelaySeconds: 5
-            timeoutSeconds: 20
-            periodSeconds: 3
-          readinessProbe:
-            httpGet:
-              host: localhost
-              scheme: HTTP
-              httpHeaders:
-                - name: X-Custom-Header
-                  value: Ready
-              path: /demo-0.0.1-SNAPSHOT/probe              
-              port: live-port
-            initialDelaySeconds: 5
-            timeoutSeconds: 20
-            periodSeconds: 3
           name: csye7374
           ports:
           - name: live-port

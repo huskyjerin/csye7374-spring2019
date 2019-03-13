@@ -3,10 +3,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: service-name
+  name: csye7374
 spec:
   selector:
-    app: nginx-deployment
+    app: csye7374
   ports:
     - port: 80
+      targetPort: 8080
   type: LoadBalancer
