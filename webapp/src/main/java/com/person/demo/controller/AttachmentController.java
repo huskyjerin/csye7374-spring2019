@@ -14,10 +14,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/transaction")
 public class AttachmentController {
-
+/*
     @Autowired
     private AttachmentService attachmentService;
-/*
+
     @GetMapping("/{transactionId}/attachment")
     public ResponseEntity<List<Attachment>> getAllByTransactionId(@PathVariable Long transactionId) throws AppException {
         List<Attachment> attachmentList = attachmentService.getAllByTransactionId(transactionId);

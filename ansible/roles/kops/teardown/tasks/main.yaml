@@ -8,8 +8,8 @@
 - name: Export Kops state store
   shell: export KOPS_STATE_STORE=s3://{{bucket_name}}
 
-# - name:
-#   command: kops delete cluster --name {{cluster_name}} --yes --state=s3://{{bucket_name}}
+- name:
+  command: kops delete cluster --name {{cluster_name}} --yes --state=s3://{{bucket_name}}
 
 
 
