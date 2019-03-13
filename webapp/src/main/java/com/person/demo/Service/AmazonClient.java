@@ -26,41 +26,41 @@ import java.io.IOException;
 public class AmazonClient {
 
 
-    private AmazonS3 s3client;
-    //private static final Logger LOG = Logger.getLogger(AmazonClient.class);
-
-    @Autowired
-    private Environment environment;
-
-    @Value("${amazonProperties.endpointUrl}")
-    private String endpointUrl;
-
-    @Value("${amazonProperties.bucketName}")
-    private String bucketName;
-
-    @Value("${amazonProperties.accessKey}")
-    private String accessKey;
-
-    @Value("${amazonProperties.secretKey}")
-    private String secretKey;
-
-
-    @PostConstruct
-    private void initializeAmazon() {
-        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
-
-        this.s3client = AmazonS3ClientBuilder.standard()
-                .withRegion(Regions.US_EAST_1)
-                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .build();
-    }
-
-
-    public boolean isBucketExists() {
-        //System.out.println("-=-=-BUCK-=-=-=-::"+bucketName);
-        boolean isexist = s3client.doesBucketExist(bucketName);
-        return isexist;
-    }
+//    private AmazonS3 s3client;
+//    //private static final Logger LOG = Logger.getLogger(AmazonClient.class);
+//
+//    @Autowired
+//    private Environment environment;
+//
+//    @Value("${amazonProperties.endpointUrl}")
+//    private String endpointUrl;
+//
+//    @Value("${amazonProperties.bucketName}")
+//    private String bucketName;
+//
+//    @Value("${amazonProperties.accessKey}")
+//    private String accessKey;
+//
+//    @Value("${amazonProperties.secretKey}")
+//    private String secretKey;
+//
+//
+//    @PostConstruct
+//    private void initializeAmazon() {
+//        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
+//
+//        this.s3client = AmazonS3ClientBuilder.standard()
+//                .withRegion(Regions.US_EAST_1)
+//                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+//                .build();
+//    }
+//
+//
+//    public boolean isBucketExists() {
+//        //System.out.println("-=-=-BUCK-=-=-=-::"+bucketName);
+//        boolean isexist = s3client.doesBucketExist(bucketName);
+//        return isexist;
+//    }
 /*
     private File convertMultiPartToFile(MultipartFile file) throws IOException {
         try {

@@ -1,0 +1,25 @@
+---
+
+- name: create log group
+  shell: aws logs create-log-group --log-group-name kubernetes-logs
+
+- name: Creating Namespace for logging
+  shell: kubectl create ns logging
+
+- name: Create fluentd-service-account
+  shell: kubectl create -f roles/kops/fluentd/tasks/fluentd-service-account.yaml
+
+- name: Create fluentd-role
+  shell: kubectl create -f roles/kops/fluentd/tasks/fluentd-role.yaml
+
+- name: Creating fluentd-role-binding
+  shell: kubectl create -f roles/kops/fluentd/tasks/fluentd-role-binding.yaml
+
+- name: Creating fluentd-configmap
+  shell: kubectl create -f roles/kops/fluentd/tasks/fluentd-configmap.yaml
+
+- name: Creating fluentd-svc
+  shell: kubectl create -f roles/kops/fluentd/tasks/fluentd-svc.yaml
+
+- name: Creating fluentd-ds
+  shell: kubectl create -f roles/kops/fluentd/tasks/fluentd-ds.yaml

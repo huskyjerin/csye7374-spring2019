@@ -9,7 +9,7 @@ RUN mvn -f /cloud_application/pom.xml clean install -DskipTests=true
 
 FROM tomcat
 
-COPY --from=build /cloud_application/target/demo-0.0.1-SNAPSHOT.war /usr/local/tomcat/webapps/
+COPY --from=build /cloud_application/target/demo.war /usr/local/tomcat/webapps/
 
 EXPOSE 8080
 

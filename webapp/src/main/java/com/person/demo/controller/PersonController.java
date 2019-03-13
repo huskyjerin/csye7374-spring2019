@@ -7,6 +7,10 @@ import com.person.demo.Service.AttachmentService;
 import com.person.demo.Service.MyUserDetailsService;
 import com.person.demo.Service.PersonService;
 import com.person.demo.pojo.Person;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
@@ -40,18 +44,36 @@ public class PersonController {
     @Autowired
     private Environment env;
 
-    @GetMapping("/probe")
-    public ResponseEntity<String> getProbeResult() throws AppException {
-        List<Person> personList = personService.getAllPerson();
-        boolean isExists = attachmentService.isBucketExists();
-        if (personList.size() > 0 && isExists) {
-            ResponseEntity.status(200);
-            return ResponseEntity.ok("DB connection success !! and Access of S3 bucket success!!");
-        } else {
-            ResponseEntity.status(500);
-            return ResponseEntity.ok("Either DB connection fail or S3 bucket access failed.");
-        }
+    private final static Logger logger = LoggerFactory.getLogger(PersonController.class);
+
+    //static final Counter requests = Counter.build().name("requests_total").help("Total number of requests.").register();
+
+    private final Counter myOperationCounterSuccess ;
+
+    public PersonController(MeterRegistry registry)
+    {
+        myOperationCounterSuccess = io.micrometer.core.instrument.Counter
+                .builder("myOperation")
+                .description("a description for humans")
+                .tags("result", "success")
+                .register(registry);
     }
+//    @GetMapping("/probe")
+//    public ResponseEntity<String> getProbeResult() throws AppException {
+//
+//        logger.info("-=-=--==INTO THE getProbeResult() method-=-=--=-=-=-");
+//        //requests.inc();
+//        List<Person> personList = personService.getAllPerson();
+//        //boolean isExists = attachmentService.isBucketExists();
+//        if (personList.size() > 0 && isExists) {
+//            ResponseEntity.status(200);
+//            return ResponseEntity.ok("DB connection success !! and Access of S3 bucket success!!");
+//        } else {
+//            ResponseEntity.status(500);
+//            return ResponseEntity.ok("Either DB connection fail or S3 bucket access failed.");
+//        }
+//
+//    }
 
     @GetMapping("/")
     public ResponseEntity<List<Person>> getAllPerson() throws AppException {
@@ -70,6 +92,7 @@ public class PersonController {
 
     @GetMapping("/time")
     public String getTime() {
+        //requests.inc();
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String date = timestamp.toString();
         String email = userService.userName;
@@ -98,12 +121,15 @@ public class PersonController {
 
     @GetMapping("/ping")
     public String getPing() {
+        myOperationCounterSuccess.increment();
         return "You have hit the Ping Service.";
     }
 
     @GetMapping("/greet/{user}")
     public String getTest(@PathVariable("user") String user) {
+        logger.info("-=-=--==INTO THE getTest() method-=-=--=-=-=-");
         String prefix = System.getenv().getOrDefault("amazonProperties.endpointUrl", "--IT IS DEFAULT VALUE--");
+        myOperationCounterSuccess.increment();
         if (prefix == null) {
             prefix = "---PREFIX IS NUL----!";
         }

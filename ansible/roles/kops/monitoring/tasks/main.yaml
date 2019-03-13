@@ -1,0 +1,120 @@
+---
+
+#- name: Helm init
+#  shell: helm init
+
+#- name: Create service account
+#  shell: kubectl create serviceaccount --namespace kube-system tiller
+
+#- name: Cluster Role binding
+#  shell: kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+
+#- name: Patching deploy
+ # shell: kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+
+#- name: Getting tiller pod ready
+ # shell: kubectl get deployment.extensions --all-namespaces -o=json --field-selector=metadata.name=tiller-deploy | jq '.items[].status.readyReplicas'
+ # args:
+ #  executable: /bin/bash
+ # register: tiller_result
+ # until: tiller_result.stdout.find('1') != -1
+ # retries: 15
+ # delay: 5
+ # changed_when: False 
+
+#- debug:
+ #    msg: "{{tiller_result.stdout}}"
+
+- name: Get load_balancer name
+  shell: kubectl get svc -o=json --field-selector=metadata.name=csye7374 | jq '.items[].status.loadBalancer.ingress[].hostname'
+  register: prometheus_config
+
+- debug:
+     msg: "{{prometheus_config.stdout}}"
+
+- name: Inserting load_balancer inside prometheus config
+  register: prom_config
+  shell: sed 's/loadbalancer.amazonaws.com/{{prometheus_config.stdout}}/g' roles/kops/monitoring/tasks/prm_sample.yaml > roles/kops/monitoring/tasks/prm.yaml 
+
+
+# - name: Set up prometheus
+#   shell: helm install --name prometheus stable/prometheus -f roles/kops/monitoring/tasks/prm.yaml
+
+# - name: Getting Prometheus pod ready
+#   shell: kubectl get deployment.extensions --all-namespaces -o=json --field-selector=metadata.name=prometheus-server | jq '.items[].status.readyReplicas'
+#   args:
+#    executable: /bin/bash
+#   register: prometheus_result
+#   until: prometheus_result.stdout.find('1') != -1
+#   retries: 25
+#   delay: 15
+#   changed_when: False 
+
+# - name: Getting prometheus pod name
+#   shell: kubectl get pods --namespace default -l "app=prometheus,component=server" -o jsonpath="{.items[0].metadata.name}"
+#   register: prometheus_pod
+
+# - name: Expose prometheus
+#   shell:  nohup kubectl --namespace default port-forward {{prometheus_pod.stdout}} 9090 >/dev/null 2>&1 &
+
+# - name: Set up grafana
+#   shell: helm install --name grafana stable/grafana --set persistence.enabled=true
+
+# - name: Getting Grafana pod ready
+#   shell: kubectl get deployment.extensions --all-namespaces -o=json --field-selector=metadata.name=grafana | jq '.items[].status.readyReplicas'
+#   args:
+#    executable: /bin/bash
+#   register: grafana_result
+#   until: grafana_result.stdout.find('1') != -1
+#   retries: 15
+#   delay: 5
+#   changed_when: False 
+
+# - debug:
+#      msg: "{{grafana_result.stdout}}"
+
+# - name: Export Pod Name
+#   shell: kubectl get pods --namespace default -l "app=grafana,release=grafana" -o jsonpath="{.items[0].metadata.name}"
+#   register: grafana_pod
+
+# - debug:
+#      msg: "{{grafana_pod.stdout}}"
+
+# - name: Expose POD
+#   shell: nohup kubectl --namespace default port-forward {{grafana_pod.stdout}} 3000 >/dev/null 2>&1 &
+
+# - name: Get admin secret 
+#   shell: kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+#   register: secret101
+          
+# - debug:
+#      msg: "{{secret101.stdout}}"
+
+
+# - name: Create elasticsearch datasource
+#   grafana_datasource:
+#     name: "datasource-prometheus"
+#     grafana_url: "http://localhost:3000"
+#     grafana_user: "admin"
+#     grafana_password: "{{secret101.stdout}}"
+#     is_default: yes
+#     sslmode: "disable"
+#     ds_type: "prometheus"
+#     url: http://prometheus-server.default.svc.cluster.local
+#     basic_auth_user: "admin"
+#     basic_auth_password: "admin"
+#     time_field: "@timestamp"
+#     time_interval: "1m"
+#     interval: "Daily"
+#     es_version: 56
+#     validate_certs: "false"
+
+# - name: Import Grafana dashboard foo
+#   grafana_dashboard:
+#     grafana_url: "http://localhost:3000"
+#     grafana_user: "admin"
+#     grafana_password: "{{secret101.stdout}}"
+#     state: present
+#     message: Updated by ansible
+#     overwrite: yes
+#     path: roles/kops/monitoring/tasks/spring-boot-statistics_rev2.json

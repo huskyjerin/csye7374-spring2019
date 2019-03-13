@@ -16,7 +16,7 @@
     var: pwd 
 
 - name: Build docker
-  command: docker build -t csye7374 ../webapp/.
+  command: docker build --no-cache -t csye7374 ../webapp/.
 
 - name: Tag Docker image
   command: docker tag csye7374:latest {{account_num}}.dkr.ecr.us-east-1.amazonaws.com/csye7374:latest
